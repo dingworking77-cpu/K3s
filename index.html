@@ -2,418 +2,434 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ระบบสแกนพัสดุ - iData K3S</title>
-  <!-- โหลด Tailwind CSS สำหรับตกแต่งหน้าเว็บให้สวยงามและรองรับจอ 4 นิ้วของ K3S -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสแกนเลขพัสดุ iData K3S</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- โหลด Tone.js สำหรับสร้างเสียงแจ้งเตือน (ติ๊ดเวลาสแกน, เสียงเตือนเมื่อสแกนซ้ำ) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-  <!-- โหลดฟอนต์ Inter และ Noto Sans Thai -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
-      overscroll-behavior-y: contain; /* ป้องกันการดึงหน้าจอเพื่อรีเฟรชโดยไม่ตั้งใจ */
-    }
-    /* ซ่อน Scrollbar แต่ยังเลื่อนดูรายการได้ */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 h-[100dvh] w-full flex flex-col overflow-hidden select-none">
+<body class="bg-slate-50 min-h-screen flex flex-col select-none">
 
-  <!-- ส่วนหัว (Header) ปรับขนาดพอดีสายตา -->
-  <header class="bg-blue-700 text-white px-3 py-2.5 shadow-md flex items-center justify-between shrink-0">
-    <div class="flex items-center space-x-2.5 min-w-0">
-      <svg class="w-8 h-8 text-blue-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-      </svg>
-      <div class="truncate">
-        <h1 class="font-bold text-lg leading-tight">สแกนพัสดุ K3S</h1>
-        <p class="text-xs text-blue-200 leading-tight truncate" id="statusText">พร้อมยิงบาร์โค้ด</p>
+  <!-- ส่วนหัว (Header) ขนาดกะทัดรัด -->
+  <header class="bg-blue-600 text-white px-3 py-2.5 shadow-md flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center space-x-2">
+      <div class="bg-white/10 p-1.5 rounded-lg">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 124h.01M16 16h.01M16 12h.01M8 12h.01M8 16h.01m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-base leading-tight">สแกนพัสดุ K3S</h1>
+        <p class="text-[11px] text-blue-100 leading-tight">พร้อมยิงบาร์โค้ด</p>
       </div>
     </div>
-    <!-- ป้ายแสดงจำนวนพัสดุรวม -->
-    <div class="bg-blue-800 border border-blue-600 px-3 py-1 rounded-xl flex items-center space-x-1.5 shrink-0 shadow-inner">
-      <span class="text-xs font-medium text-blue-200">รวม</span>
-      <span id="itemCount" class="text-base font-extrabold text-white">0</span>
+    <div class="bg-blue-700/80 px-3 py-1 rounded-xl border border-blue-500/50 flex items-center space-x-1.5">
+      <span class="text-xs text-blue-200 font-medium">รวม</span>
+      <span id="itemCount" class="font-extrabold text-base text-white">0</span>
     </div>
   </header>
 
-  <!-- กล่องแจ้งเตือนแบบนุ่มนวล -->
-  <div id="toastBanner" class="hidden px-3 py-2 text-sm font-bold text-center transition-all duration-200 shrink-0"></div>
-
-  <!-- ช่องรับค่าจากการยิงบาร์โค้ด พร้อมปุ่มเปิด/ปิดคีย์บอร์ดตามต้องการ -->
-  <section class="p-2.5 bg-white border-b border-slate-200 shadow-sm shrink-0">
-    <div class="relative flex items-center space-x-2">
+  <!-- ส่วนควบคุมการสแกนและกรอกข้อมูล -->
+  <div class="bg-white px-3 py-2.5 shadow-sm border-b border-slate-200 sticky top-[52px] z-30">
+    <div class="relative flex items-center">
       <input 
         type="text" 
         id="barcodeInput" 
         inputmode="none"
         placeholder="กดปุ่มยิงบาร์โค้ด..." 
+        class="w-full bg-slate-50 border-2 border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl px-3 py-2.5 text-base font-bold text-slate-800 placeholder-slate-400 outline-none transition"
         autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        class="w-full px-3 py-2.5 text-lg font-bold bg-slate-50 border-2 border-blue-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white text-slate-900 placeholder-slate-400"
       >
-      <!-- ปุ่มสลับเปิด/ปิดคีย์บอร์ด -->
+      <!-- ปุ่มเปิด/ปิดคีย์บอร์ด -->
       <button 
         type="button" 
         id="keyboardToggleBtn" 
-        class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 font-bold px-3 py-2.5 rounded-xl border border-slate-300 shrink-0 text-sm flex items-center justify-center shadow-sm"
+        class="absolute right-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 p-2 rounded-lg transition"
         title="เปิด/ปิดคีย์บอร์ด">
-        ⌨️
+        <svg id="keyboardIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        </svg>
       </button>
     </div>
 
-    <!-- ตัวเลือกเสริม: ป้องกันสแกนซ้ำ & เปิด/ปิดเสียง -->
-    <div class="flex items-center justify-between mt-2 px-1 text-sm text-slate-700 gap-2">
-      <label class="flex items-center space-x-1.5 py-1 cursor-pointer">
-        <input type="checkbox" id="preventDuplicate" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-        <span class="font-bold">กันซ้ำ</span>
+    <!-- ตัวเลือกเสริม -->
+    <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-xs">
+      <label class="flex items-center space-x-1.5 cursor-pointer py-1">
+        <input type="checkbox" id="preventDuplicate" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+        <span class="text-slate-700 font-semibold">กันซ้ำ</span>
       </label>
-
-      <label class="flex items-center space-x-1.5 py-1 cursor-pointer">
-        <input type="checkbox" id="enableSound" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-        <span class="font-bold">เสียง</span>
+      <label class="flex items-center space-x-1.5 cursor-pointer py-1">
+        <input type="checkbox" id="soundEnabled" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+        <span class="text-slate-700 font-semibold">เสียง</span>
       </label>
-
-      <button type="button" id="refocusBtn" class="bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-800 font-bold px-3 py-1.5 rounded-xl border border-blue-400 text-sm shadow-sm">
+      <button type="button" id="refocusBtn" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold px-2.5 py-1 rounded-lg transition">
         โฟกัสช่องยิง
       </button>
     </div>
-  </section>
+  </div>
 
-  <!-- พื้นที่แสดงรายการเลขพัสดุที่สแกนแล้ว -->
-  <main class="flex-1 overflow-y-auto p-2.5 space-y-2 no-scrollbar" id="listContainer">
-    <!-- ข้อความตอนยังไม่มีรายการ -->
-    <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-3">
-      <svg class="w-12 h-12 mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-      </svg>
-      <p class="text-base font-bold text-slate-500">ยังไม่มีรายการพัสดุ</p>
-      <p class="text-sm mt-1">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
+  <!-- ส่วนแสดงรายการพัสดุที่สแกน (เลื่อนได้) -->
+  <main class="flex-1 px-3 py-3 pb-24 overflow-y-auto">
+    <!-- กรณีไม่มีรายการ -->
+    <div id="emptyState" class="flex flex-col items-center justify-center py-16 text-center">
+      <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-3 shadow-inner">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+      </div>
+      <p class="text-slate-700 font-bold text-base">ยังไม่มีรายการพัสดุ</p>
+      <p class="text-slate-400 text-xs mt-0.5">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
     </div>
 
-    <!-- รายการบาร์โค้ดจะถูกแทรกที่นี่ด้วย JavaScript -->
-    <ul id="scannedList" class="space-y-2 hidden"></ul>
+    <!-- รายการพัสดุ -->
+    <ul id="scannedList" class="space-y-2"></ul>
   </main>
 
-  <!-- แถบปุ่มควบคุมด้านล่าง -->
-  <footer class="bg-white border-t border-slate-200 p-2.5 grid grid-cols-3 gap-2 shrink-0">
+  <!-- แถบปุ่มควบคุมด้านล่าง (ติดด้านล่างจอ) -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2.5 shadow-lg z-40 grid grid-cols-3 gap-2">
     <button 
       type="button" 
-      id="clearBtn"
-      class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold py-3 px-2 rounded-xl text-base transition flex items-center justify-center shadow-sm">
+      id="clearBtn" 
+      class="col-span-1 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold py-3 px-3 rounded-xl transition text-sm flex items-center justify-center">
       ล้างค่า
     </button>
-
     <button 
       type="button" 
-      id="saveBtn"
-      class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 px-3 rounded-xl text-base shadow-md transition flex items-center justify-center space-x-2">
-      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+      id="saveBtn" 
+      class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl transition shadow-md text-base flex items-center justify-center space-x-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
       </svg>
-      <span id="saveBtnText">บันทึก (0)</span>
+      <span>บันทึก (0)</span>
     </button>
   </footer>
+
+  <!-- Toast แจ้งเตือนลอย -->
+  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl shadow-xl text-sm font-bold z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none bg-slate-800 text-white">
+    <span id="toastMessage">แจ้งเตือน</span>
+  </div>
 
   <!-- Modal ยืนยันการล้างข้อมูล -->
   <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl text-center">
-      <h3 class="text-lg font-bold text-slate-800">ยืนยันการล้างรายการ?</h3>
-      <p class="text-sm text-slate-500 mt-1.5">รายการที่สแกนค้างไว้จะถูกลบ</p>
+      <h3 class="text-lg font-bold text-slate-800">ยืนยันการล้างรายการทั้งหมด?</h3>
+      <p class="text-sm text-slate-500 mt-1.5">รายการที่สแกนค้างไว้จะถูกลบทั้งหมด</p>
       <div class="grid grid-cols-2 gap-3 mt-5">
-        <button id="cancelClearBtn" class="py-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold text-base">ยกเลิก</button>
-        <button id="confirmClearBtn" class="py-2.5 rounded-xl bg-rose-600 text-white font-bold text-base">ลบทิ้งเลย</button>
+        <button id="cancelClearBtn" type="button" class="py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-base transition">ยกเลิก</button>
+        <button id="confirmClearBtn" type="button" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-base transition">ลบทิ้งเลย</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ยืนยันการลบทีละรายการ -->
+  <div id="confirmItemModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl text-center">
+      <h3 class="text-lg font-bold text-slate-800">ยืนยันการลบรายการนี้?</h3>
+      <p class="text-sm text-slate-500 mt-1.5">รายการพัสดุดังกล่าวจะถูกลบออกจากตาราง</p>
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button id="cancelItemBtn" type="button" class="py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-base transition">ยกเลิก</button>
+        <button id="confirmItemBtn" type="button" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-base transition">ลบรายการ</button>
       </div>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // 1. ตั้งค่า URL ของ Google Apps Script Web App
-    // =========================================================================
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzzlww8AXROufhrEu9d4zLjA_a98Bx5_SWFtKpU1R96Shh3H_xsaO4nYl7-ADHccXgJ/exec';
-
-    // ตัวแปรเก็บรายการเลขพัสดุที่สแกนได้
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzzlww8AXROufhrEu9d4zLjA_a98Bx5_SWFtKpU1R96Shh3H_xsaO4nYl7-ADHccXgJ/exec';
+    
     let scannedItems = [];
-    let isSaving = false;
-    let keyboardEnabled = false; // สถานะเปิด/ปิดคีย์บอร์ด
 
-    // อ้างอิง Element ต่างๆ บนหน้าจอ
     const barcodeInput = document.getElementById('barcodeInput');
-    const keyboardToggleBtn = document.getElementById('keyboardToggleBtn');
     const scannedList = document.getElementById('scannedList');
     const emptyState = document.getElementById('emptyState');
     const itemCount = document.getElementById('itemCount');
-    const saveBtn = document.getElementById('saveBtn');
-    const saveBtnText = document.getElementById('saveBtnText');
     const clearBtn = document.getElementById('clearBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
     const preventDuplicate = document.getElementById('preventDuplicate');
-    const enableSound = document.getElementById('enableSound');
-    const toastBanner = document.getElementById('toastBanner');
-    const statusText = document.getElementById('statusText');
+    const soundEnabled = document.getElementById('soundEnabled');
     const refocusBtn = document.getElementById('refocusBtn');
+    const keyboardToggleBtn = document.getElementById('keyboardToggleBtn');
+    
     const confirmModal = document.getElementById('confirmModal');
     const cancelClearBtn = document.getElementById('cancelClearBtn');
     const confirmClearBtn = document.getElementById('confirmClearBtn');
+    
+    const confirmItemModal = document.getElementById('confirmItemModal');
+    const cancelItemBtn = document.getElementById('cancelItemBtn');
+    const confirmItemBtn = document.getElementById('confirmItemBtn');
 
-    // =========================================================================
-    // 2. ระบบเสียงแจ้งเตือนด้วย Tone.js
-    // =========================================================================
-    let synth = null;
-    function playBeep(type) {
-      if (!enableSound.checked) return;
+    let isKeyboardOpen = false;
+
+    // ฟังก์ชันเปิด/ปิดคีย์บอร์ด
+    if (keyboardToggleBtn && barcodeInput) {
+      keyboardToggleBtn.addEventListener('click', () => {
+        isKeyboardOpen = !isKeyboardOpen;
+        if (isKeyboardOpen) {
+          barcodeInput.removeAttribute('inputmode');
+          keyboardToggleBtn.classList.add('bg-blue-100', 'text-blue-600');
+          showToast('เปิดคีย์บอร์ดแล้ว', 'bg-blue-600 text-white');
+        } else {
+          barcodeInput.setAttribute('inputmode', 'none');
+          keyboardToggleBtn.classList.remove('bg-blue-100', 'text-blue-600');
+          showToast('ปิดคีย์บอร์ด (โหมดสแกน)', 'bg-slate-700 text-white');
+        }
+        keepFocus();
+      });
+    }
+
+    // ฟังก์ชันเล่นเสียงปี๊บสแกน
+    function playBeep() {
+      if (!soundEnabled || !soundEnabled.checked) return;
       try {
-        if (!synth) {
-          synth = new Tone.Synth().toDestination();
-        }
-        if (Tone.context.state !== 'running') {
-          Tone.start();
-        }
-        if (type === 'success') {
-          synth.triggerAttackRelease('C6', '0.08');
-        } else if (type === 'duplicate') {
-          synth.triggerAttackRelease('A3', '0.2');
-        } else if (type === 'saved') {
-          const now = Tone.now();
-          synth.triggerAttackRelease('E5', '0.1', now);
-          synth.triggerAttackRelease('G5', '0.15', now + 0.12);
-        }
-      } catch (e) {
-        console.warn('Audio playback skipped:', e);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {}
+    }
+
+    // แสดง Toast แจ้งเตือน
+    function showToast(message, bgColor = 'bg-slate-800 text-white') {
+      if (!toast || !toastMessage) return;
+      toastMessage.textContent = message;
+      toast.className = `fixed bottom-20 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl shadow-xl text-sm font-bold z-50 transition-all duration-300 ${bgColor}`;
+      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // จัดการโฟกัสช่องสแกน
+    function keepFocus() {
+      if (barcodeInput) {
+        barcodeInput.focus();
       }
     }
 
-    // =========================================================================
-    // 3. ฟังก์ชันจัดการการสแกนและการเพิ่มรายการ
-    // =========================================================================
-    function handleBarcodeSubmit(rawValue) {
-      const code = String(rawValue || '').trim();
-      if (!code) return;
+    if (barcodeInput) {
+      barcodeInput.addEventListener('blur', () => {
+        setTimeout(keepFocus, 150);
+      });
 
-      if (preventDuplicate.checked) {
-        const isExist = scannedItems.some(item => item.code.toLowerCase() === code.toLowerCase());
-        if (isExist) {
-          playBeep('duplicate');
-          showToast(`⚠️ เลขซ้ำ: ${code}`, 'bg-amber-500 text-white');
-          barcodeInput.value = '';
-          keepFocus();
+      // รองรับการกด Enter ปกติ
+      barcodeInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = barcodeInput.value.trim();
+          if (val) {
+            addBarcode(val);
+            barcodeInput.value = '';
+          }
+        }
+      });
+
+      // เพิ่มระบบดึงค่าอัตโนมัติทันทีเมื่อหัวอ่านยิงข้อมูลเสร็จ (รองรับเครื่องที่ส่งค่าต่อเนื่องโดยไม่มี Enter)
+      let scanTimeout = null;
+      barcodeInput.addEventListener('input', (e) => {
+        const val = barcodeInput.value.trim();
+        // หากมีความยาวตัวอักษรบาร์โค้ดทั่วไป (เช่น มากกว่า 5 ตัวอักษร) และมีค่าเข้ามา
+        if (val.length >= 4) {
+          clearTimeout(scanTimeout);
+          scanTimeout = setTimeout(() => {
+            const currentVal = barcodeInput.value.trim();
+            if (currentVal) {
+              addBarcode(currentVal);
+              barcodeInput.value = '';
+            }
+          }, 120); // หน่วงเวลาเล็กน้อยรอให้หัวอ่านยิงตัวอักษรจนครบชุด
+        }
+      });
+    }
+
+    // เพิ่มบาร์โค้ดลงรายการ
+    function addBarcode(code) {
+      if (preventDuplicate && preventDuplicate.checked) {
+        const exists = scannedItems.some(item => item.code === code);
+        if (exists) {
+          showToast('เลขพัสดุนี้มีในรายการแล้ว (กันซ้ำ)', 'bg-amber-500 text-white');
+          playBeep();
           return;
         }
       }
 
       const now = new Date();
-      const timeStr = now.toTimeString().split(' ')[0];
-
-      scannedItems.unshift({ code: code, time: timeStr });
+      const timeString = now.toTimeString().split(' ')[0];
       
-      playBeep('success');
-      showToast(`✓ เพิ่มแล้ว: ${code}`, 'bg-blue-600 text-white');
-      
-      barcodeInput.value = '';
+      scannedItems.unshift({ code, time: timeString });
+      playBeep();
       renderList();
-      keepFocus();
+      showToast('สแกนสำเร็จ: ' + code, 'bg-emerald-600 text-white');
     }
 
+    // อัปเดตการแสดงผลรายการ
     function renderList() {
       const total = scannedItems.length;
-      itemCount.textContent = total;
-      saveBtnText.textContent = `บันทึก (${total})`;
+      if (itemCount) itemCount.textContent = total;
+      if (saveBtn) saveBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span>บันทึก (${total})</span>`;
 
       if (total === 0) {
-        emptyState.classList.remove('hidden');
-        scannedList.classList.add('hidden');
-        scannedList.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        if (scannedList) scannedList.innerHTML = '';
         return;
       }
 
-      emptyState.classList.add('hidden');
-      scannedList.classList.remove('hidden');
-
-      scannedList.innerHTML = scannedItems.map((item, index) => {
-        const orderNumber = total - index;
-        return `
-          <li class="bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div class="flex items-center space-x-2.5 overflow-hidden">
-              <span class="bg-blue-100 text-blue-700 font-extrabold text-sm w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                ${orderNumber}
-              </span>
-              <div class="truncate">
-                <p class="font-bold text-slate-900 text-base leading-tight truncate select-all">${escapeHtml(item.code)}</p>
-                <p class="text-xs text-slate-500 leading-tight mt-0.5">${item.time}</p>
+      if (emptyState) emptyState.classList.add('hidden');
+      if (scannedList) {
+        scannedList.innerHTML = scannedItems.map((item, index) => {
+          const orderNumber = total - index;
+          return `
+            <li class="bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div class="flex items-center space-x-2.5 overflow-hidden">
+                <span class="bg-blue-100 text-blue-700 font-extrabold text-sm w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                  ${orderNumber}
+                </span>
+                <div class="truncate">
+                  <p class="font-bold text-slate-900 text-base leading-tight truncate select-all">${escapeHtml(item.code)}</p>
+                  <p class="text-xs text-slate-500 leading-tight mt-0.5">${item.time}</p>
+                </div>
               </div>
-            </div>
-            <button 
-              type="button" 
-              onclick="removeItem(${index})" 
-              class="text-rose-600 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 p-2 rounded-xl transition shrink-0 ml-2"
-              title="ลบรายการนี้">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
-          </li>
-        `;
-      }).join('');
+              <button 
+                type="button" 
+                onclick="promptRemoveItem(${index})" 
+                class="text-rose-600 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 p-2 rounded-xl transition shrink-0 ml-2"
+                title="ลบรายการนี้">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </li>
+          `;
+        }).join('');
+      }
     }
 
-    window.removeItem = function(index) {
-      scannedItems.splice(index, 1);
-      renderList();
-      keepFocus();
+    let itemToDeleteIndex = null;
+
+    window.promptRemoveItem = function(index) {
+      itemToDeleteIndex = index;
+      if (confirmItemModal) {
+        confirmItemModal.classList.remove('hidden');
+        confirmItemModal.classList.add('flex');
+      }
     };
 
     function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
     }
 
-    // =========================================================================
-    // 4. ฟังก์ชันจัดการแถบแจ้งเตือนและการโฟกัสช่องสแกน
-    // =========================================================================
-    let toastTimer = null;
-    function showToast(message, colorClasses) {
-      toastBanner.textContent = message;
-      toastBanner.className = `px-3 py-2 text-sm font-bold text-center transition-all duration-200 shrink-0 ${colorClasses}`;
-      toastBanner.classList.remove('hidden');
-
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toastBanner.classList.add('hidden');
-      }, 2500);
+    // ปุ่มล้างค่าทั้งหมด
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (scannedItems.length === 0) return;
+        if (confirmModal) {
+          confirmModal.classList.remove('hidden');
+          confirmModal.classList.add('flex');
+        }
+      });
     }
 
-    function keepFocus() {
-      setTimeout(() => {
-        barcodeInput.focus();
-      }, 50);
-    }
-
-    // =========================================================================
-    // 5. ฟังก์ชันส่งข้อมูลทั้งหมดขึ้น Google Sheets
-    // =========================================================================
-    async function saveToGoogleSheets() {
-      if (isSaving) return;
-
-      if (scannedItems.length === 0) {
-        showToast('⚠️ ยังไม่มีรายการเลขพัสดุให้บันทึก', 'bg-amber-500 text-white');
+    if (cancelClearBtn) {
+      cancelClearBtn.addEventListener('click', () => {
+        if (confirmModal) {
+          confirmModal.classList.add('hidden');
+          confirmModal.classList.remove('flex');
+        }
         keepFocus();
-        return;
-      }
+      });
+    }
 
-      isSaving = true;
-      saveBtn.disabled = true;
-      saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
-      saveBtnText.textContent = 'กำลังบันทึก...';
-      statusText.textContent = 'กำลังส่งข้อมูลเข้าชีต...';
+    if (confirmClearBtn) {
+      confirmClearBtn.addEventListener('click', () => {
+        scannedItems = [];
+        renderList();
+        if (confirmModal) {
+          confirmModal.classList.add('hidden');
+          confirmModal.classList.remove('flex');
+        }
+        showToast('ล้างรายการทั้งหมดแล้ว', 'bg-slate-700 text-white');
+        keepFocus();
+      });
+    }
 
-      const itemsToSend = [...scannedItems].reverse().map(item => item.code);
+    // Event สำหรับ Modal ลบทีละรายการ
+    if (cancelItemBtn) {
+      cancelItemBtn.addEventListener('click', () => {
+        if (confirmItemModal) {
+          confirmItemModal.classList.add('hidden');
+          confirmItemModal.classList.remove('flex');
+        }
+        itemToDeleteIndex = null;
+        keepFocus();
+      });
+    }
 
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: JSON.stringify({ items: itemsToSend })
-        });
+    if (confirmItemBtn) {
+      confirmItemBtn.addEventListener('click', () => {
+        if (itemToDeleteIndex !== null && itemToDeleteIndex >= 0 && itemToDeleteIndex < scannedItems.length) {
+          scannedItems.splice(itemToDeleteIndex, 1);
+          renderList();
+          showToast('ลบรายการพัสดุเรียบร้อยแล้ว', 'bg-slate-700 text-white');
+        }
+        if (confirmItemModal) {
+          confirmItemModal.classList.add('hidden');
+          confirmItemModal.classList.remove('flex');
+        }
+        itemToDeleteIndex = null;
+        keepFocus();
+      });
+    }
 
-        const result = await response.json();
+    // ปุ่มบันทึกลง Google Sheets
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        if (scannedItems.length === 0) {
+          showToast('ยังไม่มีรายการพัสดุที่สแกน', 'bg-amber-500 text-white');
+          return;
+        }
 
-        if (result.status === 'success') {
-          playBeep('saved');
-          showToast(`✅ ${result.message}`, 'bg-emerald-600 text-white');
-          statusText.textContent = 'บันทึกล่าสุดสำเร็จ';
+        const originalHTML = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span>กำลังบันทึก...</span>';
+        showToast('กำลังส่งข้อมูลไป Google Sheets...', 'bg-blue-600 text-white');
+
+        try {
+          const payload = {
+            items: scannedItems.map(item => item.code)
+          };
+
+          await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          showToast('บันทึกลงชีตสำเร็จ!', 'bg-emerald-600 text-white');
           scannedItems = [];
           renderList();
-        } else {
-          throw new Error(result.message || 'ไม่สามารถบันทึกข้อมูลได้');
+        } catch (error) {
+          showToast('เกิดข้อผิดพลาดในการบันทึก', 'bg-rose-600 text-white');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalHTML;
+          keepFocus();
         }
-      } catch (error) {
-        console.error('Save error:', error);
-        playBeep('duplicate');
-        showToast(`❌ บันทึกล้มเหลว: ${error.message}`, 'bg-rose-600 text-white');
-        statusText.textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล';
-      } finally {
-        isSaving = false;
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
-        saveBtnText.textContent = `บันทึก (${scannedItems.length})`;
-        keepFocus();
-      }
+      });
     }
 
-    // =========================================================================
-    // 6. ผูก Event Listeners
-    // =========================================================================
-    let autoSubmitTimer = null;
-
-    barcodeInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.keyCode === 13) {
-        e.preventDefault();
-        clearTimeout(autoSubmitTimer);
-        handleBarcodeSubmit(barcodeInput.value);
-      }
-    });
-
-    barcodeInput.addEventListener('input', () => {
-      clearTimeout(autoSubmitTimer);
-      if (barcodeInput.value.trim().length > 0) {
-        autoSubmitTimer = setTimeout(() => {
-          handleBarcodeSubmit(barcodeInput.value);
-        }, 120);
-      }
-    });
-
-    // ปุ่มสลับเปิด/ปิดคีย์บอร์ด
-    keyboardToggleBtn.addEventListener('click', () => {
-      keyboardEnabled = !keyboardEnabled;
-      if (keyboardEnabled) {
-        barcodeInput.removeAttribute('inputmode');
-        keyboardToggleBtn.className = 'bg-blue-600 text-white font-bold px-3 py-2.5 rounded-xl border border-blue-700 shrink-0 text-sm flex items-center justify-center shadow-sm';
-        showToast('เปิดคีย์บอร์ดแล้ว', 'bg-blue-600 text-white');
-      } else {
-        barcodeInput.setAttribute('inputmode', 'none');
-        keyboardToggleBtn.className = 'bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 font-bold px-3 py-2.5 rounded-xl border border-slate-300 shrink-0 text-sm flex items-center justify-center shadow-sm';
-        showToast('ปิดคีย์บอร์ดแล้ว (ใช้ปุ่มยิงข้าง)', 'bg-slate-700 text-white');
-      }
-      keepFocus();
-    });
-
-    saveBtn.addEventListener('click', saveToGoogleSheets);
-
-    clearBtn.addEventListener('click', () => {
-      if (scannedItems.length === 0) return;
-      confirmModal.classList.remove('hidden');
-      confirmModal.classList.add('flex');
-    });
-
-    cancelClearBtn.addEventListener('click', () => {
-      confirmModal.classList.add('hidden');
-      confirmModal.classList.remove('flex');
-      keepFocus();
-    });
-
-    confirmClearBtn.addEventListener('click', () => {
-      scannedItems = [];
-      renderList();
-      confirmModal.classList.add('hidden');
-      confirmModal.classList.remove('flex');
-      showToast('ล้างรายการทั้งหมดแล้ว', 'bg-slate-700 text-white');
-      keepFocus();
-    });
-
-    refocusBtn.addEventListener('click', keepFocus);
+    if (refocusBtn) {
+      refocusBtn.addEventListener('click', keepFocus);
+    }
 
     window.addEventListener('load', () => {
       keepFocus();
