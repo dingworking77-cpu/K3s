@@ -27,90 +27,91 @@
 </head>
 <body class="bg-slate-100 text-slate-800 h-[100dvh] w-full flex flex-col overflow-hidden select-none">
 
-  <!-- ส่วนหัว (Header) ขยายใหญ่พิเศษ 4 เท่า -->
-  <header class="bg-blue-700 text-white px-5 py-4 shadow-md flex items-center justify-between shrink-0">
-    <div class="flex items-center space-x-4 min-w-0">
-      <svg class="w-16 h-16 text-blue-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <!-- ส่วนหัว (Header) ปรับขนาดพอดีสายตา -->
+  <header class="bg-blue-700 text-white px-3 py-2.5 shadow-md flex items-center justify-between shrink-0">
+    <div class="flex items-center space-x-2.5 min-w-0">
+      <svg class="w-8 h-8 text-blue-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
       </svg>
       <div class="truncate">
-        <h1 class="font-bold text-3xl leading-tight">สแกนพัสดุ K3S</h1>
-        <p class="text-xl text-blue-200 leading-tight truncate mt-1" id="statusText">พร้อมยิงบาร์โค้ด</p>
+        <h1 class="font-bold text-lg leading-tight">สแกนพัสดุ K3S</h1>
+        <p class="text-xs text-blue-200 leading-tight truncate" id="statusText">พร้อมยิงบาร์โค้ด</p>
       </div>
     </div>
     
     <!-- ตัวเลขสรุปจำนวนพัสดุในคิว -->
-    <div class="bg-blue-800 border-4 border-blue-400 rounded-2xl px-5 py-2.5 flex items-center space-x-3 shrink-0">
-      <span class="text-2xl font-bold text-blue-200">รวม</span>
-      <span id="itemCount" class="text-5xl font-extrabold text-white leading-none">0</span>
+    <div class="bg-blue-800 border-2 border-blue-400 rounded-xl px-3 py-1 flex items-center space-x-2 shrink-0">
+      <span class="text-sm font-bold text-blue-200">รวม</span>
+      <span id="itemCount" class="text-2xl font-extrabold text-white leading-none">0</span>
     </div>
   </header>
 
   <!-- กล่องแจ้งเตือนแบบนุ่มนวล -->
-  <div id="toastBanner" class="hidden px-5 py-3.5 text-2xl font-bold text-center transition-all duration-200 shrink-0"></div>
+  <div id="toastBanner" class="hidden px-3 py-2 text-sm font-bold text-center transition-all duration-200 shrink-0"></div>
 
-  <!-- ช่องรับค่าจากการยิงบาร์โค้ด (ขยายช่องกรอกและตัวอักษรใหญ่เต็มตา) -->
-  <section class="p-4 bg-white border-b-2 border-slate-200 shadow-sm shrink-0">
+  <!-- ช่องรับค่าจากการยิงบาร์โค้ด (ใส่ inputmode="none" เพื่อไม่ให้คีย์บอร์ดเด้งบังจอ) -->
+  <section class="p-2.5 bg-white border-b border-slate-200 shadow-sm shrink-0">
     <div class="relative flex items-center">
       <input 
         type="text" 
         id="barcodeInput" 
+        inputmode="none"
         placeholder="กดปุ่มยิงบาร์โค้ด..." 
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
         spellcheck="false"
-        class="w-full px-5 py-5 text-3xl font-bold bg-slate-50 border-4 border-blue-500 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:bg-white text-slate-900 placeholder-slate-400"
+        class="w-full px-3 py-2.5 text-lg font-bold bg-slate-50 border-2 border-blue-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white text-slate-900 placeholder-slate-400"
       >
     </div>
 
-    <!-- ตัวเลือกเสริม: ป้องกันสแกนซ้ำ & เปิด/ปิดเสียง (ขยายเช็กบ็อกซ์ ตัวอักษร และปุ่มโฟกัสใหญ่ 4 เท่า) -->
-    <div class="flex items-center justify-between mt-4 px-1 text-2xl text-slate-700 gap-2">
-      <label class="flex items-center space-x-3 py-2 cursor-pointer">
-        <input type="checkbox" id="preventDuplicate" checked class="w-9 h-9 text-blue-600 rounded-lg focus:ring-blue-500">
+    <!-- ตัวเลือกเสริม: ป้องกันสแกนซ้ำ & เปิด/ปิดเสียง -->
+    <div class="flex items-center justify-between mt-2 px-1 text-sm text-slate-700 gap-2">
+      <label class="flex items-center space-x-1.5 py-1 cursor-pointer">
+        <input type="checkbox" id="preventDuplicate" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
         <span class="font-bold">กันซ้ำ</span>
       </label>
 
-      <label class="flex items-center space-x-3 py-2 cursor-pointer">
-        <input type="checkbox" id="enableSound" checked class="w-9 h-9 text-blue-600 rounded-lg focus:ring-blue-500">
+      <label class="flex items-center space-x-1.5 py-1 cursor-pointer">
+        <input type="checkbox" id="enableSound" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
         <span class="font-bold">เสียง</span>
       </label>
 
-      <button type="button" id="refocusBtn" class="bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-800 font-bold px-5 py-3.5 rounded-2xl border-2 border-blue-400 text-2xl shadow-sm">
+      <button type="button" id="refocusBtn" class="bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-800 font-bold px-3 py-1.5 rounded-xl border border-blue-400 text-sm shadow-sm">
         โฟกัสช่องยิง
       </button>
     </div>
   </section>
 
   <!-- พื้นที่แสดงรายการเลขพัสดุที่สแกนแล้ว -->
-  <main class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar" id="listContainer">
+  <main class="flex-1 overflow-y-auto p-2.5 space-y-2 no-scrollbar" id="listContainer">
     <!-- ข้อความตอนยังไม่มีรายการ -->
-    <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-4">
-      <svg class="w-24 h-24 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-3">
+      <svg class="w-12 h-12 mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
-      <p class="text-3xl font-bold text-slate-500">ยังไม่มีรายการพัสดุ</p>
-      <p class="text-2xl mt-2">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
+      <p class="text-base font-bold text-slate-500">ยังไม่มีรายการพัสดุ</p>
+      <p class="text-sm mt-1">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
     </div>
 
     <!-- รายการบาร์โค้ดจะถูกแทรกที่นี่ด้วย JavaScript -->
-    <ul id="scannedList" class="space-y-3 hidden"></ul>
+    <ul id="scannedList" class="space-y-2 hidden"></ul>
   </main>
 
-  <!-- แถบปุ่มควบคุมด้านล่าง (ปุ่มใหญ่พิเศษ 4 เท่า) -->
-  <footer class="bg-white border-t-2 border-slate-200 p-4 grid grid-cols-3 gap-3 shrink-0">
+  <!-- แถบปุ่มควบคุมด้านล่าง -->
+  <footer class="bg-white border-t border-slate-200 p-2.5 grid grid-cols-3 gap-2 shrink-0">
     <button 
       type="button" 
       id="clearBtn"
-      class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold py-6 px-3 rounded-2xl text-3xl transition flex items-center justify-center shadow-sm">
+      class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold py-3 px-2 rounded-xl text-base transition flex items-center justify-center shadow-sm">
       ล้างค่า
     </button>
 
     <button 
       type="button" 
       id="saveBtn"
-      class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-6 px-4 rounded-2xl text-3xl shadow-md transition flex items-center justify-center space-x-3">
-      <svg class="w-10 h-10 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 px-3 rounded-xl text-base shadow-md transition flex items-center justify-center space-x-2">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
       </svg>
       <span id="saveBtnText">บันทึก (0)</span>
@@ -118,13 +119,13 @@
   </footer>
 
   <!-- Modal ยืนยันการล้างข้อมูล -->
-  <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-5 z-50">
-    <div class="bg-white rounded-3xl w-full max-w-md p-7 shadow-2xl text-center">
-      <h3 class="text-3xl font-bold text-slate-800">ยืนยันการล้างรายการ?</h3>
-      <p class="text-2xl text-slate-500 mt-3">รายการที่สแกนค้างไว้จะถูกลบ</p>
-      <div class="grid grid-cols-2 gap-4 mt-7">
-        <button id="cancelClearBtn" class="py-5 rounded-2xl bg-slate-200 text-slate-800 font-bold text-2xl">ยกเลิก</button>
-        <button id="confirmClearBtn" class="py-5 rounded-2xl bg-rose-600 text-white font-bold text-2xl">ลบทิ้งเลย</button>
+  <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl text-center">
+      <h3 class="text-lg font-bold text-slate-800">ยืนยันการล้างรายการ?</h3>
+      <p class="text-sm text-slate-500 mt-1.5">รายการที่สแกนค้างไว้จะถูกลบ</p>
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button id="cancelClearBtn" class="py-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold text-base">ยกเลิก</button>
+        <button id="confirmClearBtn" class="py-2.5 rounded-xl bg-rose-600 text-white font-bold text-base">ลบทิ้งเลย</button>
       </div>
     </div>
   </div>
@@ -240,22 +241,22 @@
         // หมายเลขลำดับจริง (นับจากรายการแรกที่ยิง)
         const orderNumber = total - index;
         return `
-          <li class="bg-white px-4 py-4 rounded-2xl border-2 border-slate-200 shadow-sm flex items-center justify-between">
-            <div class="flex items-center space-x-4 overflow-hidden">
-              <span class="bg-blue-100 text-blue-700 font-extrabold text-2xl w-14 h-14 rounded-xl flex items-center justify-center shrink-0">
+          <li class="bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-2.5 overflow-hidden">
+              <span class="bg-blue-100 text-blue-700 font-extrabold text-sm w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
                 ${orderNumber}
               </span>
               <div class="truncate">
-                <p class="font-extrabold text-slate-900 text-3xl leading-tight truncate select-all">${escapeHtml(item.code)}</p>
-                <p class="text-xl text-slate-500 leading-tight mt-1">${item.time}</p>
+                <p class="font-bold text-slate-900 text-base leading-tight truncate select-all">${escapeHtml(item.code)}</p>
+                <p class="text-xs text-slate-500 leading-tight mt-0.5">${item.time}</p>
               </div>
             </div>
             <button 
               type="button" 
               onclick="removeItem(${index})" 
-              class="text-rose-600 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 p-4 rounded-2xl transition shrink-0 ml-2"
+              class="text-rose-600 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 p-2 rounded-xl transition shrink-0 ml-2"
               title="ลบรายการนี้">
-              <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
             </button>
@@ -284,7 +285,7 @@
     let toastTimer = null;
     function showToast(message, colorClasses) {
       toastBanner.textContent = message;
-      toastBanner.className = `px-5 py-3.5 text-2xl font-bold text-center transition-all duration-200 shrink-0 ${colorClasses}`;
+      toastBanner.className = `px-3 py-2 text-sm font-bold text-center transition-all duration-200 shrink-0 ${colorClasses}`;
       toastBanner.classList.remove('hidden');
 
       clearTimeout(toastTimer);
