@@ -39,79 +39,84 @@
         id="barcodeInput" 
         inputmode="none"
         placeholder="กดปุ่มยิงบาร์โค้ด..." 
-        class="w-full bg-slate-50 border-2 border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl px-3 py-2.5 text-base font-bold text-slate-800 placeholder-slate-400 outline-none transition"
+        class="w-full bg-slate-50 border-2 border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl pl-3 pr-20 py-3 text-base font-bold text-slate-800 placeholder-slate-400 outline-none transition"
         autocomplete="off"
       >
-      <!-- ปุ่มเปิด/ปิดคีย์บอร์ด -->
+      <!-- ปุ่มเปิด/ปิดคีย์บอร์ด (ขยายใหญ่พิเศษ) -->
       <button 
         type="button" 
         id="keyboardToggleBtn" 
-        class="absolute right-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 p-2 rounded-lg transition"
+        class="absolute right-1.5 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 p-3 rounded-xl shadow-md transition flex items-center justify-center"
         title="เปิด/ปิดคีย์บอร์ด">
-        <svg id="keyboardIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        <svg id="keyboardIcon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
         </svg>
       </button>
     </div>
 
     <!-- ตัวเลือกเสริม -->
     <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-xs">
-      <label class="flex items-center space-x-1.5 cursor-pointer py-1">
-        <input type="checkbox" id="preventDuplicate" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
-        <span class="text-slate-700 font-semibold">กันซ้ำ</span>
-      </label>
-      <label class="flex items-center space-x-1.5 cursor-pointer py-1">
-        <input type="checkbox" id="soundEnabled" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
-        <span class="text-slate-700 font-semibold">เสียง</span>
-      </label>
-      <button type="button" id="refocusBtn" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold px-2.5 py-1 rounded-lg transition">
-        โฟกัสช่องยิง
-      </button>
+      <div class="flex items-center space-x-3 shrink-0">
+        <label class="flex items-center space-x-1.5 cursor-pointer py-1">
+          <input type="checkbox" id="preventDuplicate" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+          <span class="text-slate-700 font-semibold">กันซ้ำ</span>
+        </label>
+        <label class="flex items-center space-x-1.5 cursor-pointer py-1">
+          <input type="checkbox" id="soundEnabled" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+          <span class="text-slate-700 font-semibold">เสียง</span>
+        </label>
+      </div>
+      <div class="flex items-center space-x-1 text-blue-700 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-200 ml-2">
+        <span class="leading-tight">หากสแกนแล้วไม่มีเลขขึ้นให้กดตรงนี้</span>
+        <svg class="w-5 h-5 text-blue-600 shrink-0 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7V17"></path>
+        </svg>
+      </div>
     </div>
   </div>
 
-  <!-- ส่วนแสดงรายการพัสดุที่สแกน (เลื่อนได้) -->
-  <main class="flex-1 px-3 py-3 pb-24 overflow-y-auto">
-    <!-- กรณีไม่มีรายการ -->
-    <div id="emptyState" class="flex flex-col items-center justify-center py-16 text-center">
-      <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-3 shadow-inner">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <!-- พื้นที่แสดงรายการพัสดุที่สแกนแล้ว -->
+  <main class="flex-1 px-3 py-2.5 overflow-y-auto pb-24">
+    <div id="emptyState" class="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+      <div class="bg-slate-200/70 p-4 rounded-full mb-3">
+        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
         </svg>
       </div>
-      <p class="text-slate-700 font-bold text-base">ยังไม่มีรายการพัสดุ</p>
-      <p class="text-slate-400 text-xs mt-0.5">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
+      <p class="font-bold text-slate-500 text-base">ยังไม่มีรายการพัสดุ</p>
+      <p class="text-xs text-slate-400 mt-1">กดปุ่มสแกนด้านข้างเครื่องเพื่อยิง</p>
     </div>
 
-    <!-- รายการพัสดุ -->
     <ul id="scannedList" class="space-y-2"></ul>
   </main>
 
-  <!-- แถบปุ่มควบคุมด้านล่าง (ติดด้านล่างจอ) -->
-  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2.5 shadow-lg z-40 grid grid-cols-3 gap-2">
-    <button 
-      type="button" 
-      id="clearBtn" 
-      class="col-span-1 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold py-3 px-3 rounded-xl transition text-sm flex items-center justify-center">
-      ล้างค่า
-    </button>
-    <button 
-      type="button" 
-      id="saveBtn" 
-      class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl transition shadow-md text-base flex items-center justify-center space-x-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-      </svg>
-      <span>บันทึก (0)</span>
-    </button>
+  <!-- แถบปุ่มควบคุมด้านล่าง (ติดขอบล่างตลอดเวลา) -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-3 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
+    <div class="grid grid-cols-3 gap-2.5">
+      <button 
+        type="button" 
+        id="clearBtn" 
+        class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold py-3.5 rounded-xl text-base transition flex items-center justify-center">
+        ล้างค่า
+      </button>
+      <button 
+        type="button" 
+        id="saveBtn" 
+        class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 rounded-xl text-base shadow-md transition flex items-center justify-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>บันทึก (0)</span>
+      </button>
+    </div>
   </footer>
 
-  <!-- Toast แจ้งเตือนลอย -->
-  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl shadow-xl text-sm font-bold z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none bg-slate-800 text-white">
+  <!-- Toast แจ้งเตือน -->
+  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl shadow-xl text-sm font-bold z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none bg-slate-800 text-white whitespace-nowrap">
     <span id="toastMessage">แจ้งเตือน</span>
   </div>
 
-  <!-- Modal ยืนยันการล้างข้อมูล -->
+  <!-- Modal ยืนยันการล้างรายการทั้งหมด -->
   <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl text-center">
       <h3 class="text-lg font-bold text-slate-800">ยืนยันการล้างรายการทั้งหมด?</h3>
@@ -150,7 +155,6 @@
     const toastMessage = document.getElementById('toastMessage');
     const preventDuplicate = document.getElementById('preventDuplicate');
     const soundEnabled = document.getElementById('soundEnabled');
-    const refocusBtn = document.getElementById('refocusBtn');
     const keyboardToggleBtn = document.getElementById('keyboardToggleBtn');
     
     const confirmModal = document.getElementById('confirmModal');
@@ -169,31 +173,52 @@
         isKeyboardOpen = !isKeyboardOpen;
         if (isKeyboardOpen) {
           barcodeInput.removeAttribute('inputmode');
-          keyboardToggleBtn.classList.add('bg-blue-100', 'text-blue-600');
+          keyboardToggleBtn.classList.remove('bg-slate-200', 'text-slate-800');
+          keyboardToggleBtn.classList.add('bg-blue-600', 'text-white');
           showToast('เปิดคีย์บอร์ดแล้ว', 'bg-blue-600 text-white');
         } else {
           barcodeInput.setAttribute('inputmode', 'none');
-          keyboardToggleBtn.classList.remove('bg-blue-100', 'text-blue-600');
-          showToast('ปิดคีย์บอร์ด (โหมดสแกน)', 'bg-slate-700 text-white');
+          keyboardToggleBtn.classList.remove('bg-blue-600', 'text-white');
+          keyboardToggleBtn.classList.add('bg-slate-200', 'text-slate-800');
+          showToast('ปิดคีย์บอร์ดแล้ว (พร้อมยิง)', 'bg-slate-800 text-white');
         }
-        keepFocus();
+        barcodeInput.blur();
+        setTimeout(() => {
+          barcodeInput.focus();
+        }, 50);
       });
     }
 
-    // ฟังก์ชันเล่นเสียงปี๊บสแกน
+    // ฟังก์ชันเล่นเสียงปี๊บสแกน (ยิงคลื่นเสียงซ้อน 2 ตัวให้ดังและพุ่งที่สุด)
     function playBeep() {
       if (!soundEnabled || !soundEnabled.checked) return;
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        oscillator.connect(gainNode);
+        
+        // ใช้คลื่นเสียง 2 ความถี่ประสานกันเพื่อเพิ่มความดังและความคมชัดบนลำโพงเล็ก
+        osc1.type = 'square';
+        osc1.frequency.setValueAtTime(1400, audioCtx.currentTime);
+        
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(2800, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+        
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.08);
+        
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 0.16);
+        osc2.stop(audioCtx.currentTime + 0.16);
       } catch (e) {}
     }
 
@@ -425,10 +450,6 @@
           keepFocus();
         }
       });
-    }
-
-    if (refocusBtn) {
-      refocusBtn.addEventListener('click', keepFocus);
     }
 
     window.addEventListener('load', () => {
