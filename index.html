@@ -142,8 +142,25 @@
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzzlww8AXROufhrEu9d4zLjA_a98Bx5_SWFtKpU1R96Shh3H_xsaO4nYl7-ADHccXgJ/exec';
+    const STORAGE_KEY = 'idata_k3s_scanned_items';
     
+    // โหลดข้อมูลเก่าที่เคยสแกนค้างไว้จากหน่วยความจำเครื่อง
     let scannedItems = [];
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        scannedItems = JSON.parse(savedData);
+      }
+    } catch (e) {
+      scannedItems = [];
+    }
+
+    // ฟังก์ชันบันทึกรายการปัจจุบันลงหน่วยความจำเครื่อง
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scannedItems));
+      } catch (e) {}
+    }
 
     const barcodeInput = document.getElementById('barcodeInput');
     const scannedList = document.getElementById('scannedList');
@@ -290,6 +307,7 @@
       const timeString = now.toTimeString().split(' ')[0];
       
       scannedItems.unshift({ code, time: timeString });
+      saveToLocalStorage(); // บันทึกลงเครื่องทันที
       playBeep();
       renderList();
       showToast('สแกนสำเร็จ: ' + code, 'bg-emerald-600 text-white');
@@ -376,6 +394,7 @@
     if (confirmClearBtn) {
       confirmClearBtn.addEventListener('click', () => {
         scannedItems = [];
+        saveToLocalStorage(); // ล้างข้อมูลในเครื่องด้วย
         renderList();
         if (confirmModal) {
           confirmModal.classList.add('hidden');
@@ -402,6 +421,7 @@
       confirmItemBtn.addEventListener('click', () => {
         if (itemToDeleteIndex !== null && itemToDeleteIndex >= 0 && itemToDeleteIndex < scannedItems.length) {
           scannedItems.splice(itemToDeleteIndex, 1);
+          saveToLocalStorage(); // อัปเดตข้อมูลในเครื่องหลังลบ
           renderList();
           showToast('ลบรายการพัสดุเรียบร้อยแล้ว', 'bg-slate-700 text-white');
         }
@@ -441,6 +461,7 @@
 
           showToast('บันทึกลงชีตสำเร็จ!', 'bg-emerald-600 text-white');
           scannedItems = [];
+          saveToLocalStorage(); // ล้างข้อมูลในเครื่องเมื่อส่งเข้าชีตสำเร็จแล้ว
           renderList();
         } catch (error) {
           showToast('เกิดข้อผิดพลาดในการบันทึก', 'bg-rose-600 text-white');
@@ -453,6 +474,7 @@
     }
 
     window.addEventListener('load', () => {
+      renderList(); // แสดงรายการเก่าที่ค้างอยู่ในเครื่องทันทีที่เปิดเว็บ
       keepFocus();
     });
   </script>
