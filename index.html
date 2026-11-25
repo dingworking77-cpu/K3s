@@ -192,28 +192,38 @@
           barcodeInput.removeAttribute('inputmode');
           keyboardToggleBtn.classList.remove('bg-slate-200', 'text-slate-800');
           keyboardToggleBtn.classList.add('bg-blue-600', 'text-white');
-          showToast('เปิดคีย์บอร์ดแล้ว', 'bg-blue-600 text-white');
+          showToast('เปิดคีย์บอร์ดแล้ว (พิมพ์เองได้)', 'bg-blue-600 text-white');
         } else {
           barcodeInput.setAttribute('inputmode', 'none');
           keyboardToggleBtn.classList.remove('bg-blue-600', 'text-white');
           keyboardToggleBtn.classList.add('bg-slate-200', 'text-slate-800');
-          showToast('ปิดคีย์บอร์ดแล้ว (พร้อมยิง)', 'bg-slate-800 text-white');
+          showToast('ปิดคีย์บอร์ดแล้ว (พร้อมยิงสแกน)', 'bg-slate-800 text-white');
         }
         barcodeInput.blur();
-        setTimeout(() => {
-          barcodeInput.focus();
-        }, 50);
+        setTimeout(() => barcodeInput.focus(), 50);
       });
     }
 
-    // ฟังก์ชันเล่นเสียงปี๊บสแกน (ยิงคลื่นเสียงซ้อน 2 ตัวให้ดังและพุ่งที่สุด)
+    // ฟังก์ชันเล่นเสียงปี๊บสแกน (ใช้ AudioContext ตัวเดียวร่วมกัน ป้องกันเบราว์เซอร์บล็อกเสียงเมื่อยิงครบ 15-20 ครั้ง)
+    let sharedAudioCtx = null;
+    function getAudioContext() {
+      if (!sharedAudioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          sharedAudioCtx = new AudioContextClass();
+        }
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume();
+      }
+      return sharedAudioCtx;
+    }
+
     function playBeep() {
       if (!soundEnabled || !soundEnabled.checked) return;
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        const audioCtx = getAudioContext();
+        if (!audioCtx) return;
         
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
@@ -238,6 +248,10 @@
         osc2.stop(audioCtx.currentTime + 0.16);
       } catch (e) {}
     }
+
+    // ปลุกระบบเสียงทันทีที่มีการแตะหน้าจอครั้งแรก
+    document.addEventListener('touchstart', getAudioContext, { once: true });
+    document.addEventListener('click', getAudioContext, { once: true });
 
     // แสดง Toast แจ้งเตือน
     function showToast(message, bgColor = 'bg-slate-800 text-white') {
