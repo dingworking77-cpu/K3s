@@ -249,6 +249,33 @@
       } catch (e) {}
     }
 
+    // ฟังก์ชันเล่นเสียงเตือนกรณีสแกนเลขซ้ำ (โทนต่ำ 2 จังหวะ ตื๊ด-ตื๊ด)
+    function playDuplicateBeep() {
+      if (!soundEnabled || !soundEnabled.checked) return;
+      try {
+        const audioCtx = getAudioContext();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+        // เล่นเสียงโทนต่ำ 2 ครั้งติดกันเพื่อเตือนว่าเลขซ้ำ
+        [0, 0.18].forEach((offset) => {
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(320, now + offset);
+
+          gainNode.gain.setValueAtTime(1.0, now + offset);
+
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          osc.start(now + offset);
+          osc.stop(now + offset + 0.13);
+        });
+      } catch (e) {}
+    }
+
     // ปลุกระบบเสียงทันทีที่มีการแตะหน้าจอครั้งแรก
     document.addEventListener('touchstart', getAudioContext, { once: true });
     document.addEventListener('click', getAudioContext, { once: true });
@@ -345,7 +372,7 @@
         const exists = scannedItems.some(item => item.code === code);
         if (exists) {
           showToast('เลขพัสดุนี้มีในรายการแล้ว (กันซ้ำ)', 'bg-amber-500 text-white');
-          playBeep();
+          playDuplicateBeep();
           return;
         }
       }
